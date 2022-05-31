@@ -26,15 +26,30 @@ class Finder:
         sorted_photos_json = sorted(photo_list, key=lambda item: item['likes']['count'] + item['comments']['count'], reverse=True)
         top_photos = []
         for photo_json in sorted_photos_json[:3]:
-            top_photos.append(photo_json['sizes'][-1]['url'])
+            top_photos.append(f'photo{photo_json["owner_id"]}_{photo_json["id"]}')
         return top_photos
 
-    def find_matches(self, age_from, age_to, city, sex, status) -> list:
+    def get_city_id(self, city):
+        city_id_url = self.URL + 'database.getCities'
+        city_id_params = {
+            'access_token': self.token,
+            'v': self.API_VERSION,
+            'country_id': 1,
+            'q': city
+        }
+        response = requests.get(city_id_url, params=city_id_params)
+        response_json = response.json()
+        if response_json['response']['count'] > 0:
+            return response_json['response']['items'][0]['id']
+        else:
+            return -1
+
+    def find_matches(self, age_from, age_to, city_id, sex, status) -> list:
         search_params = {
             'access_token': self.token,
             'count': 5,
             'fields': 'city,relation,sex',
-            'city': city,
+            'city': city_id,
             'sex': sex,
             'age_from': age_from,
             'age_to': age_to,
@@ -52,12 +67,12 @@ class Finder:
                             item['first_name'],
                             item['last_name'],
                             item['city']['title'],
-                            item['sex'],
+                            User.SEX_MAPPING_REVERSE[item['sex']],
                             status)
                 users.append(user)
 
         for user in users:
-            user.top_photos = self.__get_top_photos(user.id)
+            user.top_photos = self.__get_top_photos(user.vk_id)
         return users
 
 
