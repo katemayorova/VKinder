@@ -11,7 +11,7 @@ class User:
         1: "ж",
         2: "м"
     }
-    vk_id: str
+    vk_id: int
     name: str
     surname: str
     city: str
