@@ -12,9 +12,9 @@ class Controller:
     def __init__(self):
         my_token = os.getenv("PERSONAL_TOKEN")
         bot_token = os.getenv("BOT_TOKEN")
-        self.persistence = Persistence()
-        self.finder = Finder(my_token, self.persistence.get_match_dao())
-        self.vkbot = VkBot(bot_token, self.on_match_request, self.persistence.get_search_dao())
+        persistence = Persistence()
+        self.finder = Finder(my_token, persistence.get_match_dao())
+        self.vkbot = VkBot(bot_token, self.on_match_request, persistence.get_search_dao())
 
     def run(self):
         self.vkbot.message_polling()
