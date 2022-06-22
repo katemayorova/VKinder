@@ -12,9 +12,9 @@ class Controller:
     def __init__(self):
         my_token = os.getenv("PERSONAL_TOKEN")
         bot_token = os.getenv("BOT_TOKEN")
-        persistence = Persistence()
-        self.finder = Finder(my_token, persistence)
-        self.vkbot = VkBot(bot_token, self.on_match_request)
+        self.persistence = Persistence()
+        self.finder = Finder(my_token, self.persistence.get_match_dao())
+        self.vkbot = VkBot(bot_token, self.on_match_request, self.persistence.get_search_dao())
 
     def run(self):
         self.vkbot.message_polling()
@@ -22,7 +22,7 @@ class Controller:
     def on_match_request(self, requester_id, age_from, age_to, sex, city):
         city_id = self.finder.get_city_id(city)
         if city_id < 0:
-            self.vkbot.send_messages(requester_id, f"Город \"{city}\" не найден")
+            self.vkbot.send_message(requester_id, f"Город \"{city}\" не найден")
         else:
             matches = self.finder.find_unique_matches(
                 requester_id,

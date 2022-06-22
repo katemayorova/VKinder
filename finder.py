@@ -8,12 +8,12 @@ class Finder:
     __URL = 'https://api.vk.com/method/'
     __token: str
 
-    __FIND_COUNT = 3
+    __FIND_COUNT = 1
     __FIND_WINDOW = 5
 
-    def __init__(self, token, persistence):
+    def __init__(self, token, match_dao):
         self.__token = token
-        self.persistence = persistence
+        self.match_dao = match_dao
 
     def __get_top_photos(self, vk_owner_id: int):
         photos_url = self.__URL + 'photos.get'
@@ -56,14 +56,14 @@ class Finder:
             offset += 1
             unique_users = []
             for user in current_users:
-                if self.persistence.check_uniqueness(user.vk_id, requester_id):
+                if self.match_dao.check_uniqueness(user.vk_id, requester_id):
                     unique_users.append(user)
             users.extend(unique_users)
         users = users[:self.__FIND_COUNT]
 
         for user in users:
             user.top_photos = self.__get_top_photos(user.vk_id)
-            self.persistence.save_match(user.vk_id, requester_id)
+            self.match_dao.save_match(user.vk_id, requester_id)
         return users
 
     def __find_matches(self, age_from, age_to, city_id, sex, status, count, offset) -> list:
